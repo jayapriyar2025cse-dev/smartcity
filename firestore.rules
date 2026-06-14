@@ -1,0 +1,48 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper: check if user is admin
+    function isAdmin() {
+      return request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // ── users ─────────────────────────────────────────────────
+    match /users/{userId} {
+      allow read:  if request.auth != null && (isOwner(userId) || isAdmin());
+      allow write: if request.auth != null && isOwner(userId);
+    }
+
+    // ── complaints ────────────────────────────────────────────
+    match /complaints/{complaintId} {
+      // Citizens: create their own, read their own
+      allow create: if request.auth != null;
+      allow read:   if request.auth != null &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+      // Admins: update status, AI fields
+      allow update: if isAdmin() ||
+        (request.auth != null && resource.data.userId == request.auth.uid &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['upvotes']));
+      allow delete: if isAdmin();
+    }
+
+    // ── alerts ────────────────────────────────────────────────
+    match /alerts/{alertId} {
+      allow read:   if isAdmin();
+      allow write:  if isAdmin();
+      // Cloud Functions write alerts server-side (bypasses rules via Admin SDK)
+    }
+
+    // ── cityMetrics ───────────────────────────────────────────
+    match /cityMetrics/{docId} {
+      allow read:  if request.auth != null; // All logged-in users can see city health
+      allow write: if isAdmin();
+      // Cloud Functions update this via Admin SDK
+    }
+  }
+}
