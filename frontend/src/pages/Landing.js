@@ -171,9 +171,9 @@ export default function Landing() {
       {showSignIn && <SignInModal onClose={() => setShowSignIn(false)} />}
 
       {/* Navbar */}
-      <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 48px', borderBottom: '1px solid #1e293b', position: 'sticky', top: 0, background: 'rgba(15,23,42,0.95)', backdropFilter: 'blur(10px)', zIndex: 100 }}>
+      <nav className="landing-nav" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 48px', borderBottom: '1px solid #1e293b', position: 'sticky', top: 0, background: 'rgba(15,23,42,0.95)', backdropFilter: 'blur(10px)', zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 36, height: 36, background: 'rgba(59,130,246,0.2)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 36, height: 36, background: 'rgba(59,130,246,0.2)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Building2 size={20} color="#3b82f6" />
           </div>
           <div>
@@ -181,18 +181,18 @@ export default function Landing() {
             <div style={{ fontSize: 10, color: '#64748b' }}>Tamil Nadu</div>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
           {user ? (
-            <Link to={dashLink} style={{ padding: '8px 20px', borderRadius: 8, background: '#3b82f6', color: 'white', textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>
-              Go to Dashboard →
+            <Link to={dashLink} style={{ padding: '8px 16px', borderRadius: 8, background: '#3b82f6', color: 'white', textDecoration: 'none', fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap' }}>
+              Dashboard →
             </Link>
           ) : (
             <>
               <button onClick={() => setShowSignIn(true)}
-                style={{ padding: '8px 20px', borderRadius: 8, border: '1px solid #334155', color: '#94a3b8', background: 'transparent', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+                style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #334155', color: '#94a3b8', background: 'transparent', fontSize: 13, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
                 Sign In
               </button>
-              <Link to="/register" style={{ padding: '8px 20px', borderRadius: 8, background: '#3b82f6', color: 'white', textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>
+              <Link to="/register" style={{ padding: '8px 16px', borderRadius: 8, background: '#3b82f6', color: 'white', textDecoration: 'none', fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap' }}>
                 Get Started
               </Link>
             </>
@@ -201,7 +201,7 @@ export default function Landing() {
       </nav>
 
       {/* Hero */}
-      <section style={{ textAlign: 'center', padding: '80px 48px 60px', background: 'radial-gradient(ellipse at top, #1e3a5f 0%, #0f172a 60%)' }}>
+      <section className="landing-hero" style={{ textAlign: 'center', padding: '80px 48px 60px', background: 'radial-gradient(ellipse at top, #1e3a5f 0%, #0f172a 60%)' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 16px', background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.3)', borderRadius: 20, fontSize: 13, color: '#3b82f6', marginBottom: 24 }}>
           <Zap size={14} /> AI-Powered Smart City Platform
         </div>
@@ -211,7 +211,7 @@ export default function Landing() {
         <p style={{ fontSize: 18, color: '#94a3b8', maxWidth: 560, margin: '0 auto 36px', lineHeight: 1.7 }}>
           Report city issues, track complaints in real-time, and let AI suggest the best actions for government officials.
         </p>
-        <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+        <div className="landing-hero-btns" style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
           <Link to="/register" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 28px', background: '#3b82f6', color: 'white', borderRadius: 10, textDecoration: 'none', fontSize: 15, fontWeight: 700 }}>
             Get Started Free <ArrowRight size={16} />
           </Link>
@@ -232,9 +232,9 @@ export default function Landing() {
       </section>
 
       {/* Stats */}
-      <section style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, background: '#1e293b', borderTop: '1px solid #1e293b', borderBottom: '1px solid #1e293b' }}>
+      <section className="landing-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, background: '#1e293b', borderTop: '1px solid #1e293b', borderBottom: '1px solid #1e293b' }}>
         {stats.map((s) => (
-          <div key={s.label} style={{ textAlign: 'center', padding: '32px 16px', background: '#0f172a' }}>
+          <div key={s.label} style={{ textAlign: 'center', padding: '28px 16px', background: '#0f172a' }}>
             <div style={{ fontSize: 36, fontWeight: 900, color: '#3b82f6' }}>{s.value}</div>
             <div style={{ fontSize: 13, color: '#64748b', marginTop: 4 }}>{s.label}</div>
           </div>
@@ -242,12 +242,12 @@ export default function Landing() {
       </section>
 
       {/* Features */}
-      <section style={{ padding: '80px 48px' }}>
+      <section className="landing-section" style={{ padding: '80px 48px' }}>
         <div style={{ textAlign: 'center', marginBottom: 48 }}>
           <h2 style={{ fontSize: 36, fontWeight: 800, marginBottom: 12 }}>Everything you need</h2>
           <p style={{ color: '#64748b', fontSize: 16 }}>Built for citizens and city officials</p>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, maxWidth: 1000, margin: '0 auto' }}>
+        <div className="landing-features-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, maxWidth: 1000, margin: '0 auto' }}>
           {features.map((f) => (
             <div key={f.title} style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 12, padding: 24, transition: 'border-color 0.2s' }}
               onMouseEnter={(e) => e.currentTarget.style.borderColor = '#3b82f6'}
@@ -261,11 +261,11 @@ export default function Landing() {
       </section>
 
       {/* How it works */}
-      <section style={{ padding: '60px 48px', background: '#1e293b' }}>
+      <section className="landing-section" style={{ padding: '60px 48px', background: '#1e293b' }}>
         <div style={{ textAlign: 'center', marginBottom: 48 }}>
           <h2 style={{ fontSize: 36, fontWeight: 800, marginBottom: 12 }}>How it works</h2>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32, maxWidth: 900, margin: '0 auto' }}>
+        <div className="landing-steps" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32, maxWidth: 900, margin: '0 auto' }}>
           {[
             { step: '01', title: 'Submit Complaint', desc: 'Citizens report issues with photo, location and voice description', icon: '📝' },
             { step: '02', title: 'AI Processes',     desc: 'AI engine detects hotspots, assigns priority and generates recommendations', icon: '🤖' },
@@ -284,10 +284,10 @@ export default function Landing() {
       </section>
 
       {/* CTA */}
-      <section style={{ textAlign: 'center', padding: '80px 48px', background: 'radial-gradient(ellipse at center, #1e3a5f 0%, #0f172a 70%)' }}>
+      <section className="landing-cta" style={{ textAlign: 'center', padding: '80px 48px', background: 'radial-gradient(ellipse at center, #1e3a5f 0%, #0f172a 70%)' }}>
         <h2 style={{ fontSize: 36, fontWeight: 800, marginBottom: 16 }}>Ready to make your city smarter?</h2>
         <p style={{ color: '#64748b', marginBottom: 32, fontSize: 16 }}>Join thousands of citizens improving Tamil Nadu</p>
-        <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+        <div className="landing-hero-btns" style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
           <Link to="/register" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 32px', background: '#3b82f6', color: 'white', borderRadius: 12, textDecoration: 'none', fontSize: 15, fontWeight: 700 }}>
             Get Started Free <ArrowRight size={16} />
           </Link>
