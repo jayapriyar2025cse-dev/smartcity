@@ -22,21 +22,15 @@ const FAKE_IMAGE_LABELS = [
 
 export const verifyImageClient = async (file, imgElement, category) => {
   try {
-    // Convert file to base64
-    const base64 = await new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target.result.split(',')[1]);
-      reader.readAsDataURL(file);
-    });
-
     // Call Hugging Face API
+    console.log('HF Token:', HF_TOKEN ? 'present' : 'MISSING');
     const response = await fetch(HF_MODEL, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${HF_TOKEN}`,
-        'Content-Type': 'application/json',
+        'Content-Type': file.type,
       },
-      body: JSON.stringify({ inputs: base64 }),
+      body: file,
     });
 
     if (!response.ok) throw new Error('API failed');
