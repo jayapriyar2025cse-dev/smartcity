@@ -1,4 +1,4 @@
-const HF_TOKEN = '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';
+const HF_TOKEN = process.env.REACT_APP_HF_TOKEN;
 const HF_MODEL = 'https://api-inference.huggingface.co/models/google/vit-base-patch16-224';
 
 const CATEGORY_KEYWORDS = {
