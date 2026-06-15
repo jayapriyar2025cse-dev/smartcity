@@ -1,94 +1,42 @@
-const HF_TOKEN = process.env.REACT_APP_HF_TOKEN;
-const HF_MODEL = 'https://api-inference.huggingface.co/models/google/vit-base-patch16-224';
-
-const CATEGORY_KEYWORDS = {
-  'Garbage':      ['garbage', 'trash', 'waste', 'litter', 'dump', 'rubbish', 'debris', 'bin', 'refuse', 'compost'],
-  'Road Damage':  ['road', 'pothole', 'asphalt', 'pavement', 'street', 'highway', 'crack', 'concrete', 'sidewalk'],
-  'Flood':        ['flood', 'water', 'river', 'lake', 'ocean', 'puddle', 'rain', 'drainage', 'stream', 'wet'],
-  'Fire':         ['fire', 'flame', 'smoke', 'burn', 'blaze', 'explosion', 'campfire', 'torch'],
-  'Pollution':    ['smoke', 'smog', 'pollution', 'factory', 'chimney', 'exhaust', 'fume', 'haze', 'dust'],
-  'Power Outage': ['wire', 'cable', 'electricity', 'pole', 'transformer', 'electric', 'power', 'line'],
-  'Water Supply': ['pipe', 'water', 'plumbing', 'leak', 'tap', 'drain', 'sewage', 'faucet'],
-  'Accident':     ['accident', 'car', 'vehicle', 'crash', 'truck', 'bus', 'motorcycle', 'collision', 'ambulance'],
-  'Noise':        ['crowd', 'concert', 'speaker', 'music', 'street', 'people', 'party'],
-  'Other':        [],
-};
-
-const FAKE_IMAGE_LABELS = [
-  'comic book', 'cartoon', 'illustration', 'drawing', 'anime', 'painting',
-  'meme', 'screenshot', 'website', 'document', 'text', 'poster', 'banner',
-  'advertisement', 'graphic', 'wallpaper', 'art', 'sketch', 'clipart',
-];
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || '';
 
 export const verifyImageClient = async (file, imgElement, category) => {
   try {
-    // Call Hugging Face API
-    console.log('HF Token:', HF_TOKEN ? 'present' : 'MISSING');
-    const response = await fetch(HF_MODEL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${HF_TOKEN}`,
-        'Content-Type': file.type,
-      },
-      body: file,
+    // Convert to base64
+    const base64 = await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.readAsDataURL(file);
     });
 
-    if (!response.ok) throw new Error('API failed');
+    const response = await fetch(`${BACKEND_URL}/api/verify-image`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageBase64: base64, category }),
+    });
 
-    const results = await response.json();
-    // results = [{ label: 'cat', score: 0.95 }, ...]
-    const labels = results.map((r) => r.label.toLowerCase());
-    const topLabel = labels[0] || '';
+    if (!response.ok) throw new Error('Backend unavailable');
 
-    // Check 1: Is it a fake/non-real image?
-    const isFake = FAKE_IMAGE_LABELS.some((f) => labels.slice(0, 5).some((l) => l.includes(f)));
-    if (isFake) {
-      return {
-        status: 'NOT_REAL',
-        isRealPhoto: false,
-        isRelevant: false,
-        realIssues: [`Fake or non-real image detected (${topLabel}) — upload a real photo`],
-        message: `Fake or non-real image detected — upload a real photo of the issue`,
-        dominantColors: [],
-        relevanceMsg: '',
-        entropy: 0,
-      };
-    }
-
-    // Check 2: Does image match category?
-    let isRelevant = true;
-    let relevanceMsg = 'Image matches complaint category';
-
-    if (category && category !== 'Other') {
-      const keywords = CATEGORY_KEYWORDS[category] || [];
-      const matched  = keywords.some((k) => labels.slice(0, 10).some((l) => l.includes(k)));
-      if (!matched) {
-        isRelevant   = false;
-        relevanceMsg = `Image doesn't match "${category}" category — detected: ${results.slice(0, 3).map(r => r.label).join(', ')}`;
-      }
-    }
-
+    const result = await response.json();
     return {
-      status: isRelevant ? 'VERIFIED' : 'NOT_RELEVANT',
-      isRealPhoto: true,
-      isRelevant,
-      realIssues: [],
-      message: isRelevant
-        ? `Real photo verified — detected: ${results.slice(0, 2).map(r => r.label).join(', ')}`
-        : relevanceMsg,
-      dominantColors: results.slice(0, 3).map((r) => `${r.label} ${Math.round(r.score * 100)}%`),
-      relevanceMsg,
-      entropy: 9999,
+      status:        result.status,
+      isRealPhoto:   result.isRealPhoto ?? true,
+      isRelevant:    result.isRelevant  ?? true,
+      realIssues:    result.status === 'NOT_REAL' ? [result.message] : [],
+      message:       result.message,
+      dominantColors: result.detectedLabels?.slice(0, 3) || [],
+      relevanceMsg:  result.message,
+      entropy:       9999,
+      fallback:      result.mock || false,
     };
 
   } catch {
-    // Fallback to canvas if API fails
     return verifyImageCanvas(imgElement, category);
   }
 };
 
-// Canvas fallback
-const verifyImageCanvas = (imgElement, category) => {
+// Canvas fallback when backend unavailable
+const verifyImageCanvas = (imgElement) => {
   return new Promise((resolve) => {
     try {
       const canvas = document.createElement('canvas');
