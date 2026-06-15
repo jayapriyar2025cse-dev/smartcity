@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import {
   Building2, LayoutDashboard, PlusCircle, ClipboardList,
-  BarChart3, LogOut, User, Shield, Bell, UserCircle
+  BarChart3, LogOut, User, Shield, Bell, UserCircle, Menu, X
 } from 'lucide-react';
 
 const CitizenNav = () => (
@@ -28,6 +28,7 @@ const AdminNav = () => (
 export default function Sidebar() {
   const { user, userRole, logout } = useAuth();
   const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -36,7 +37,16 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="sidebar">
+    <>
+      {/* Overlay */}
+      <div className={`sidebar-overlay ${open ? 'show' : ''}`} onClick={() => setOpen(false)} />
+
+      {/* Hamburger button (mobile) */}
+      <button className="hamburger" onClick={() => setOpen(!open)} style={{ position: 'fixed', top: 16, left: 16, zIndex: 300 }}>
+        {open ? <X size={24} /> : <Menu size={24} />}
+      </button>
+
+      <div className={`sidebar ${open ? 'open' : ''}`}>
       <div className="sidebar-logo">
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
           <div style={{ width: 36, height: 36, background: 'rgba(59,130,246,0.2)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -76,6 +86,20 @@ export default function Sidebar() {
           <LogOut size={14} /> Sign Out
         </button>
       </div>
-    </div>
+      </div>
+
+      {/* Mobile bottom bar with logout */}
+      <div className="mobile-bar">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(59,130,246,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {userRole === 'admin' ? <Shield size={14} color="#a855f7" /> : <User size={14} color="#3b82f6" />}
+          </div>
+          <span style={{ fontSize: 13, fontWeight: 600 }}>{user?.displayName || 'User'}</span>
+        </div>
+        <button className="btn btn-outline btn-sm" onClick={handleLogout}>
+          <LogOut size={14} /> Sign Out
+        </button>
+      </div>
+    </>
   );
 }
