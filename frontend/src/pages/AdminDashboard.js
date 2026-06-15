@@ -24,6 +24,7 @@ const TABS = [
   { id: 'complaints', label: 'All Complaints',  icon: List },
   { id: 'ai',         label: 'AI Engine',       icon: AlertTriangle },
   { id: 'fraud',      label: 'AI Fraud',        icon: ShieldAlert },
+  { id: 'safety',     label: 'City Safety',     icon: Users },
 ];
 
 export default function AdminDashboard() {
@@ -301,10 +302,72 @@ export default function AdminDashboard() {
         {/* ── FRAUD TAB ── */}
         {activeTab === 'fraud' && <FraudDetection complaints={complaints} />}
 
+        {/* ── CITY SAFETY TAB ── */}
+        {activeTab === 'safety' && (
+          <CitySafetyTab complaints={complaints} />
+        )}
+
       </main>
     </div>
   );
 }
+
+const CITIES = ['Chennai', 'Coimbatore', 'Madurai', 'Trichy', 'Salem'];
+
+const CitySafetyTab = ({ complaints }) => {
+  const cityStats = CITIES.map((city) => {
+    const cityComplaints = complaints.filter((c) => c.ward?.startsWith(city));
+    const total    = cityComplaints.length;
+    const pending  = cityComplaints.filter((c) => c.status === 'Pending').length;
+    const resolved = cityComplaints.filter((c) => c.status === 'Resolved').length;
+    const score    = total === 0 ? 100 : Math.max(0, Math.round(100 - (pending * 3) - ((total - resolved) * 1.5)));
+    const zone     = score >= 80 ? 'Safe' : score >= 50 ? 'Moderate' : 'Serious';
+    const color    = score >= 80 ? '#22c55e' : score >= 50 ? '#eab308' : '#ef4444';
+    const emoji    = score >= 80 ? '✅' : score >= 50 ? '⚠️' : '🚨';
+    return { city, total, pending, resolved, score, zone, color, emoji };
+  });
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div className="card">
+        <div className="section-title">🏙️ City Safety Overview</div>
+        <div style={{ display: 'flex', gap: 16, marginBottom: 16, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 13, color: '#22c55e' }}>✅ Safe = 80–100%</span>
+          <span style={{ fontSize: 13, color: '#eab308' }}>⚠️ Moderate = 50–79%</span>
+          <span style={{ fontSize: 13, color: '#ef4444' }}>🚨 Serious = below 50%</span>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {cityStats.map(({ city, total, pending, resolved, score, zone, color, emoji }) => (
+            <div key={city} style={{ padding: '16px', background: '#0f172a', borderRadius: 10, border: `1px solid ${color}33` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: 22 }}>{emoji}</span>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: 15 }}>{city}</div>
+                    <div style={{ fontSize: 12, color, fontWeight: 600 }}>{zone} Zone</div>
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: 28, fontWeight: 800, color }}>{score}%</div>
+                  <div style={{ fontSize: 11, color: '#64748b' }}>Safety Score</div>
+                </div>
+              </div>
+              {/* Progress bar */}
+              <div style={{ height: 8, background: '#1e293b', borderRadius: 4, overflow: 'hidden', marginBottom: 10 }}>
+                <div style={{ height: '100%', width: `${score}%`, background: color, borderRadius: 4, transition: 'width 0.8s ease' }} />
+              </div>
+              <div style={{ display: 'flex', gap: 16 }}>
+                <span style={{ fontSize: 12, color: '#64748b' }}>Total: <strong style={{ color: '#f1f5f9' }}>{total}</strong></span>
+                <span style={{ fontSize: 12, color: '#ef4444' }}>Pending: <strong>{pending}</strong></span>
+                <span style={{ fontSize: 12, color: '#22c55e' }}>Resolved: <strong>{resolved}</strong></span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const StatCard = ({ label, value, icon, color }) => (
   <div className="stat-card" style={{ '--accent-color': color }}>
