@@ -41,7 +41,7 @@ body {
   display: flex; flex-direction: column; padding: 24px 0; position: fixed;
   height: 100vh; overflow-y: auto; z-index: 100;
 }
-.main-content { margin-left: 260px; flex: 1; padding: 32px; min-height: 100vh; }
+.main-content { margin-left: 260px; flex: 1; padding: 32px; min-height: 100vh; overflow-x: hidden; }
 
 /* Sidebar */
 .sidebar-logo { padding: 0 24px 24px; border-bottom: 1px solid var(--border); }
@@ -199,9 +199,18 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 @media (max-width: 768px) {
   .sidebar { transform: translateX(-100%); transition: transform 0.3s; }
   .sidebar.open { transform: translateX(0); }
-  .main-content { margin-left: 0; padding: 16px; padding-top: 60px; padding-bottom: 80px; }
-  .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+  .main-content { margin-left: 0 !important; padding: 16px !important; padding-top: 60px !important; padding-bottom: 80px !important; width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; }
+  .layout { display: block !important; }
+  .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr !important; }
   .mobile-bar { display: flex !important; }
+  .complaint-card-header { flex-direction: column !important; align-items: flex-start !important; gap: 8px !important; }
+  .complaint-card-actions { width: 100%; justify-content: space-between !important; }
+  .table-wrapper table { font-size: 12px; }
+  .table-wrapper th, .table-wrapper td { padding: 10px 8px; }
+  .auth-card { padding: 0 16px; }
+  .page-header h1 { font-size: 20px; }
+  .stat-value { font-size: 24px; }
+  .profile-grid { grid-template-columns: 1fr !important; }
 }
 
 /* Landing page responsive */

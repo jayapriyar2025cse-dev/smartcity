@@ -2,6 +2,12 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 
+// Force clear stale localStorage seed
+if (!['v5'].includes(localStorage.getItem('smartcity_seeded'))) {
+  localStorage.removeItem('smartcity_complaints');
+  localStorage.removeItem('smartcity_seeded');
+}
+
 class ErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { error: null }; }
   componentDidCatch(error) { this.setState({ error }); }

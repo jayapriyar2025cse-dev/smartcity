@@ -8,10 +8,10 @@ import { DUMMY_COMPLAINTS } from './dummyData';
 
 // ── LOCAL STORAGE HELPERS ─────────────────────────────────────
 const seedLocalData = () => {
-  if (localStorage.getItem('smartcity_seeded') === 'v3') return;
-  const seeded = DUMMY_COMPLAINTS.map((c) => ({ ...c, timestamp: c.createdAt }));
+  if (localStorage.getItem('smartcity_seeded') === 'v5') return;
+  const seeded = DUMMY_COMPLAINTS.map((c) => ({ ...c, timestamp: c.createdAt, status: 'Pending' }));
   localStorage.setItem('smartcity_complaints', JSON.stringify(seeded));
-  localStorage.setItem('smartcity_seeded', 'v3');
+  localStorage.setItem('smartcity_seeded', 'v5');
 };
 
 const getLocal  = ()     => { seedLocalData(); return JSON.parse(localStorage.getItem('smartcity_complaints') || '[]'); };
@@ -70,20 +70,24 @@ export const getUserComplaints = (userId, callback) => {
       where('userId', '==', userId)
     );
     return onSnapshot(q, (snap) => {
-      const data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      let data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       data.sort((a, b) => {
         const ta = a.timestamp?.toDate?.() || new Date(a.timestamp || 0);
         const tb = b.timestamp?.toDate?.() || new Date(b.timestamp || 0);
         return tb - ta;
       });
-      callback(data);
+      // If no real complaints exist, show dummy data so UI is never empty
+      if (data.length === 0) {
+        const dummy = DUMMY_COMPLAINTS.slice(0, 10).map((c) => ({ ...c, userId, status: 'Pending' }));
+        callback(dummy);
+      } else {
+        callback(data);
+      }
     });
   }
-  // In local/demo mode return complaints belonging to this user;
-  // demo citizen-001 gets the first 10 dummy complaints so they have data to see
   const all = getLocal();
   const mine = all.filter((c) => c.userId === userId);
-  const results = mine.length > 0 ? mine : all.slice(0, 10).map((c) => ({ ...c, userId }));
+  const results = mine.length > 0 ? mine : DUMMY_COMPLAINTS.slice(0, 10).map((c) => ({ ...c, userId, status: 'Pending' }));
   callback(results);
   return () => {};
 };

@@ -10,7 +10,7 @@ import AdminDashboard   from './pages/AdminDashboard';
 import SubmitComplaint  from './pages/SubmitComplaint';
 import ComplaintHistory from './pages/ComplaintHistory';
 import ComplaintDetail  from './pages/ComplaintDetail';
-import Profile          from './pages/Profile';
+import Profile          from './pages/ProfileNew';
 import Notifications    from './pages/Notifications';
 import './App.css';
 
