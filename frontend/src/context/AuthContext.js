@@ -52,8 +52,10 @@ export const AuthProvider = ({ children }) => {
       if (firebaseUser) {
         try {
           const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-          const role = userDoc.exists() ? userDoc.data().role : 'citizen';
-          setUser({ ...firebaseUser, role });
+          const data = userDoc.exists() ? userDoc.data() : {};
+          const role = data.role || 'citizen';
+          const displayName = firebaseUser.displayName || data.name || null;
+          setUser({ ...firebaseUser, displayName, role });
           setUserRole(role);
         } catch {
           setUser(firebaseUser);
@@ -78,7 +80,10 @@ export const AuthProvider = ({ children }) => {
     const cred = await signInWithEmailAndPassword(auth, email, password);
     try {
       const userDoc = await getDoc(doc(db, 'users', cred.user.uid));
-      const role = userDoc.exists() ? userDoc.data().role : 'citizen';
+      const data = userDoc.exists() ? userDoc.data() : {};
+      const role = data.role || 'citizen';
+      const name = data.name || cred.user.displayName || null;
+      if (name && !cred.user.displayName) await updateProfile(cred.user, { displayName: name });
       setUserRole(role);
     } catch { setUserRole('citizen'); }
     return cred;

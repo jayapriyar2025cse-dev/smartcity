@@ -218,7 +218,7 @@ export default function SubmitComplaint() {
     try {
       await submitComplaint(
         { ...form, location, imageVerification: verifyResult ? { status: verifyResult.status, isRealPhoto: verifyResult.isRealPhoto, isRelevant: verifyResult.isRelevant, verifiedAt: new Date().toISOString() } : null },
-        image, user.uid
+        image, user.uid, user.displayName || user.email, user.email
       );
       toast.success('✅ Complaint submitted successfully!');
       navigate('/history');

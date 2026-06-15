@@ -69,6 +69,8 @@ export default function ComplaintDetail() {
   const priorityScore = complaint.priorityScore || CATEGORY_PRIORITY[complaint.category] || 2;
   const catColor     = CATEGORY_COLORS[complaint.category] || '#6b7280';
   const statusClass  = complaint.status === 'Pending' ? 'pending' : complaint.status === 'In Progress' ? 'progress' : 'resolved';
+  const lat = complaint.latitude  || complaint.location?.lat  || null;
+  const lng = complaint.longitude || complaint.location?.lng  || null;
 
   return (
     <div className="layout">
@@ -124,9 +126,23 @@ export default function ComplaintDetail() {
             </div>
 
             {/* Image */}
-            {complaint.imageUrl && (
+            {complaint.imageUrl ? (
               <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                <img src={complaint.imageUrl} alt="complaint" style={{ width: '100%', maxHeight: 320, objectFit: 'cover' }} />
+                <div style={{ padding: '12px 16px', borderBottom: '1px solid #334155', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  🖼️ Submitted Photo
+                  {complaint.imageVerification && (
+                    <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20,
+                      background: complaint.imageVerification.status === 'Verified' ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
+                      color: complaint.imageVerification.status === 'Verified' ? '#22c55e' : '#ef4444' }}>
+                      {complaint.imageVerification.status === 'Verified' ? '✔ Verified' : '⚠ Suspicious'}
+                    </span>
+                  )}
+                </div>
+                <img src={complaint.imageUrl} alt="complaint" style={{ width: '100%', maxHeight: 360, objectFit: 'cover', display: 'block' }} />
+              </div>
+            ) : (
+              <div className="card" style={{ textAlign: 'center', color: '#475569', fontSize: 13, padding: '32px 0' }}>
+                📷 No image submitted
               </div>
             )}
 
@@ -148,11 +164,11 @@ export default function ComplaintDetail() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             <div className="card">
               <div className="section-title"><MapPin size={16} /> Location</div>
-              {complaint.latitude && complaint.longitude ? (
+              {lat && lng ? (
                 <div style={{ height: 280, borderRadius: 8, overflow: 'hidden', border: '1px solid #334155' }}>
-                  <MapContainer center={[complaint.latitude, complaint.longitude]} zoom={15} style={{ height: '100%', width: '100%' }}>
+                  <MapContainer center={[lat, lng]} zoom={15} style={{ height: '100%', width: '100%' }}>
                     <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
-                    <Marker position={[complaint.latitude, complaint.longitude]} />
+                    <Marker position={[lat, lng]} />
                   </MapContainer>
                 </div>
               ) : (
@@ -160,9 +176,9 @@ export default function ComplaintDetail() {
                   No location data
                 </div>
               )}
-              {complaint.latitude && (
+              {lat && (
                 <div style={{ marginTop: 8, fontSize: 12, color: '#475569' }}>
-                  📍 {complaint.latitude?.toFixed(4)}, {complaint.longitude?.toFixed(4)}
+                  📍 {parseFloat(lat).toFixed(4)}, {parseFloat(lng).toFixed(4)}
                 </div>
               )}
             </div>

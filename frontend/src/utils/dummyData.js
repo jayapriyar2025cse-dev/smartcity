@@ -38,8 +38,22 @@ const WARD_COORDS = {
 // Small offset to simulate nearby complaints in same hotspot zone
 const jitter = (val, range = 0.003) => val + (Math.random() - 0.5) * range;
 
+const TAMIL_NAMES = [
+  'Arjun Kumar','Priya Rajan','Karthik Selvam','Divya Nair','Suresh Babu',
+  'Lakshmi Devi','Vijay Murugan','Anitha Krishnan','Rahul Sharma','Meena Sundaram',
+  'Siva Prakash','Kavitha Ravi','Murugan Pillai','Saranya Mohan','Bala Subramani',
+  'Geetha Venkat','Dinesh Pandi','Rekha Natarajan','Senthil Kumar','Pooja Iyer',
+  'Mani Chandran','Sangeetha Raj','Arun Balaji','Nithya Kumari','Ramesh Gopal',
+  'Deepa Suresh','Vinoth Raja','Usha Rani','Ganesh Babu','Malathi Sundar',
+  'Jayakumar Pillai','Revathi Nair','Ashok Selvam','Bhuvana Krishnan','Naveen Raj',
+  'Padmavathi Devi','Ravi Shankar','Sumathi Mohan','Praveen Kumar','Indira Gandhi',
+  'Manikandan Raju','Chitra Venkat','Balaji Natarajan','Vimala Devi','Saravanan K',
+  'Kamala Sundaram','Tamilarasan M','Radha Krishnan','Harish Babu','Anandhi Raj',
+];
+
 const makeComplaint = (id, title, category, ward, status, hrs, userId, description, upvotes) => {
   const coords = WARD_COORDS[ward] || { lat: 13.0604, lng: 80.2496 };
+  const nameIdx = (parseInt(String(id)) - 1) % TAMIL_NAMES.length;
   return {
     id: String(id),
     title,
@@ -51,6 +65,8 @@ const makeComplaint = (id, title, category, ward, status, hrs, userId, descripti
     longitude: jitter(coords.lng),
     location:  { lat: jitter(coords.lat), lng: jitter(coords.lng) },
     userId:    userId || 'citizen-001',
+    userName:  TAMIL_NAMES[nameIdx],
+    userEmail: userId || 'citizen@demo.com',
     upvotes:   upvotes || Math.floor(Math.random() * 50) + 5,
     timestamp: h(hrs),
     createdAt: h(hrs),

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getUserComplaints } from '../utils/firestoreService';
-import { DUMMY_COMPLAINTS, CATEGORIES, STATUS_COLORS, CATEGORY_COLORS } from '../utils/dummyData';
+import { getUserComplaints, deleteComplaint } from '../utils/firestoreService';
+import { CATEGORIES, STATUS_COLORS, CATEGORY_COLORS } from '../utils/dummyData';
 import Sidebar from '../components/Sidebar';
 import { format } from 'date-fns';
-import { Search, Filter, Eye } from 'lucide-react';
+import { Search, Filter, Eye, Trash2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 export default function ComplaintHistory() {
   const { user } = useAuth();
@@ -39,6 +40,23 @@ export default function ComplaintHistory() {
     if (categoryFilter) result = result.filter((c) => c.category === categoryFilter);
     setFiltered(result);
   }, [search, statusFilter, categoryFilter, complaints]);
+
+  const [deletingId, setDeletingId] = useState(null);
+
+  const handleDelete = async (e, id) => {
+    e.stopPropagation();
+    if (!window.confirm('Delete this complaint? This cannot be undone.')) return;
+    setDeletingId(id);
+    try {
+      await deleteComplaint(id);
+      setComplaints((prev) => prev.filter((c) => c.id !== id));
+      toast.success('Complaint deleted');
+    } catch {
+      toast.error('Failed to delete complaint');
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const formatDate = (ts) => {
     try { return format(new Date(ts?.toDate?.() || ts), 'MMM d, yyyy HH:mm'); } catch { return 'N/A'; }
@@ -77,20 +95,35 @@ export default function ComplaintHistory() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {filtered.map((c) => (
-              <div key={c.id} className="card card-sm" style={{ display: 'flex', gap: 16, alignItems: 'flex-start', cursor: 'pointer' }} onClick={() => navigate(`/complaint/${c.id}`)}>
+                <div key={c.id} className="card card-sm" style={{ display: 'flex', gap: 16, alignItems: 'flex-start', cursor: 'pointer' }} onClick={() => navigate(`/complaint/${c.id}`)}>
                 {c.imageUrl && (
                   <img src={c.imageUrl} alt="" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }} />
                 )}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, flexWrap: 'wrap' }}>
                     <div style={{ display:'flex', alignItems:'center', gap:8 }}>
                     <div style={{ fontWeight: 600, fontSize: 15 }}>{c.title}</div>
                     <Link to={`/complaint/${c.id}`} style={{ color:'#3b82f6', display:'flex', alignItems:'center' }}><Eye size={14}/></Link>
                   </div>
-                    <span className={`badge badge-${c.status === 'Pending' ? 'pending' : c.status === 'In Progress' ? 'progress' : 'resolved'}`}>
-                      {c.status}
-                    </span>
-                  </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span className={`badge badge-${c.status === 'Pending' ? 'pending' : c.status === 'In Progress' ? 'progress' : 'resolved'}`}>
+                          {c.status}
+                        </span>
+                        {c.status === 'Pending' && (
+                          <button
+                            onClick={(e) => handleDelete(e, c.id)}
+                            disabled={deletingId === c.id}
+                            title="Delete complaint"
+                            style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 10px', borderRadius: 6, border: '1px solid rgba(239,68,68,0.4)', background: 'rgba(239,68,68,0.08)', color: '#ef4444', fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
+                            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(239,68,68,0.2)'}
+                            onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(239,68,68,0.08)'}
+                          >
+                            <Trash2 size={12} />
+                            {deletingId === c.id ? 'Deleting...' : 'Delete'}
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   <div style={{ fontSize: 13, color: '#94a3b8', marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {c.description}
                   </div>

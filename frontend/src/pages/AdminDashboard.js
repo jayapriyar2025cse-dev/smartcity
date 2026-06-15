@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { updateComplaintStatus } from '../utils/firestoreService';
 import { useRealTimeData } from '../hooks/useRealTimeData';
 import { CATEGORIES, WARDS, CATEGORY_COLORS } from '../utils/dummyData';
@@ -13,7 +14,7 @@ import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 import {
   LayoutDashboard, Map, BarChart3, List, AlertTriangle,
-  CheckCircle, Clock, XCircle, Users, TrendingUp, ShieldAlert
+  CheckCircle, Clock, XCircle, Users, TrendingUp, ShieldAlert, ShieldCheck, User
 } from 'lucide-react';
 import FraudDetection from '../components/FraudDetection';
 
@@ -215,14 +216,16 @@ export default function AdminDashboard() {
             <div className="table-wrapper">
               <table>
                 <thead>
-                  <tr><th>Title</th><th>Category</th><th>Ward</th><th>Status</th><th>Date</th><th>Actions</th></tr>
+                  <tr><th>Title</th><th>Category</th><th>Ward</th><th>Submitted By</th><th>Image</th><th>Status</th><th>Date</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
                   {filteredComplaints.map((c) => (
                     <tr key={c.id}>
                       <td>
-                        <div style={{ fontWeight: 500, color: '#f1f5f9', fontSize: 13 }}>{c.title}</div>
-                        <div style={{ fontSize: 11, color: '#475569', marginTop: 2, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.description}</div>
+                        <Link to={`/complaint/${c.id}`} style={{ textDecoration: 'none' }}>
+                          <div style={{ fontWeight: 500, color: '#3b82f6', fontSize: 13, cursor: 'pointer' }}>{c.title}</div>
+                          <div style={{ fontSize: 11, color: '#475569', marginTop: 2, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.description}</div>
+                        </Link>
                       </td>
                       <td>
                         <span style={{ background: (CATEGORY_COLORS[c.category] || '#6b7280') + '22', color: CATEGORY_COLORS[c.category] || '#6b7280', padding: '2px 8px', borderRadius: 4, fontSize: 11 }}>
@@ -230,6 +233,39 @@ export default function AdminDashboard() {
                         </span>
                       </td>
                       <td style={{ fontSize: 13 }}>{c.ward || '—'}</td>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <User size={12} color="#475569" />
+                          <div>
+                            <div style={{ fontSize: 13, color: '#f1f5f9', fontWeight: 500 }}>
+                              {c.userName || (c.userEmail ? c.userEmail.split('@')[0] : c.userId)}
+                            </div>
+                            <div style={{ fontSize: 11, color: '#475569', maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {c.userEmail || (c.userId?.includes('@') ? c.userId : '')}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        {c.imageVerification ? (
+                          <span style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 4,
+                            padding: '2px 8px', borderRadius: 20, fontSize: 11, fontWeight: 700,
+                            background: c.imageVerification.status === 'VERIFIED' ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
+                            color: c.imageVerification.status === 'VERIFIED' ? '#22c55e' : '#ef4444',
+                            boxShadow: `0 0 6px ${c.imageVerification.status === 'VERIFIED' ? '#22c55e33' : '#ef444433'}`,
+                          }}>
+                            {c.imageVerification.status === 'VERIFIED'
+                              ? <ShieldCheck size={10} />
+                              : <ShieldAlert size={10} />}
+                            {c.imageVerification.status === 'VERIFIED' ? 'Verified' : 'Fake/Suspicious'}
+                          </span>
+                        ) : c.imageUrl ? (
+                          <span style={{ fontSize: 11, color: '#475569' }}>No scan</span>
+                        ) : (
+                          <span style={{ fontSize: 11, color: '#334155' }}>No image</span>
+                        )}
+                      </td>
                       <td>
                         <span className={`badge badge-${c.status === 'Pending' ? 'pending' : c.status === 'In Progress' ? 'progress' : 'resolved'}`}>
                           {c.status}
