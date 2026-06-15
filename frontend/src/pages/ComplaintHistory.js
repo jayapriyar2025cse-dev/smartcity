@@ -5,10 +5,11 @@ import { DUMMY_COMPLAINTS, CATEGORIES, STATUS_COLORS, CATEGORY_COLORS } from '..
 import Sidebar from '../components/Sidebar';
 import { format } from 'date-fns';
 import { Search, Filter, Eye } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function ComplaintHistory() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [complaints, setComplaints] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [search, setSearch] = useState('');
@@ -76,7 +77,7 @@ export default function ComplaintHistory() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {filtered.map((c) => (
-              <div key={c.id} className="card card-sm" style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+              <div key={c.id} className="card card-sm" style={{ display: 'flex', gap: 16, alignItems: 'flex-start', cursor: 'pointer' }} onClick={() => navigate(`/complaint/${c.id}`)}>
                 {c.imageUrl && (
                   <img src={c.imageUrl} alt="" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }} />
                 )}
